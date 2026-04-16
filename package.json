@@ -1,0 +1,42 @@
+{
+  "name": "@console-one/collections",
+  "version": "0.1.0",
+  "description": "A home for collection data structures with different referencing and observation techniques. Currently ships LinkedQueue and ObservableQueue; more variants planned.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./linked-queue": {
+      "types": "./dist/linked-queue.d.ts",
+      "import": "./dist/linked-queue.js"
+    },
+    "./observable-queue": {
+      "types": "./dist/observable-queue.d.ts",
+      "import": "./dist/observable-queue.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run clean && npm run build && npm test"
+  },
+  "keywords": ["queue", "collections", "linked-list", "observable"],
+  "license": "UNLICENSED",
+  "private": true,
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0",
+    "@types/node": "^20.0.0"
+  }
+}
