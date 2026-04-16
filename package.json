@@ -2,6 +2,14 @@
   "name": "@console-one/collections",
   "version": "0.1.0",
   "description": "A home for collection data structures with different referencing and observation techniques. Currently ships LinkedQueue and ObservableQueue; more variants planned.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/console-one/collections.git"
+  },
+  "bugs": {
+    "url": "https://github.com/console-one/collections/issues"
+  },
+  "homepage": "https://github.com/console-one/collections#readme",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -21,8 +29,8 @@
   },
   "files": [
     "dist",
-    "src",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsc",
@@ -31,9 +39,14 @@
     "test:watch": "vitest",
     "prepublishOnly": "npm run clean && npm run build && npm test"
   },
-  "keywords": ["queue", "collections", "linked-list", "observable"],
-  "license": "UNLICENSED",
-  "private": true,
+  "keywords": [
+    "queue",
+    "collections",
+    "linked-list",
+    "observable"
+  ],
+  "author": "Andrew Chalmers",
+  "license": "MIT",
   "devDependencies": {
     "typescript": "^5.4.0",
     "vitest": "^1.6.0",
