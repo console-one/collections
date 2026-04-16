@@ -1,6 +1,6 @@
 {
   "name": "@console-one/collections",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A home for collection data structures with different referencing and observation techniques. Currently ships LinkedQueue and ObservableQueue; more variants planned.",
   "repository": {
     "type": "git",

@@ -2,7 +2,7 @@ export {
   LinkedQueue,
   type LinkedQueueOptions,
   type LinkedQueueItem,
-} from './linked-queue'
+} from './linked-queue.js'
 
 export {
   ObservableQueue,
@@ -10,4 +10,4 @@ export {
   type ObservableQueueItem,
   type ObservableQueueEventHandler,
   type ObservableQueueListeners,
-} from './observable-queue'
+} from './observable-queue.js'
