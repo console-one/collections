@@ -108,23 +108,11 @@ new LinkedQueue<T>(maxSize?: number, { pipe?, chain? })
 | `on(event, create)` | Subscribe to a queue event (`'push'`). `create(unsub)` must return the actual handler; you get an unsubscribe function to close over. |
 | `insert(data).before(node)` / `.after(node)` | Splice a new item at a specific node position. Takes a `QueueItem` reference (from `q.first`, `q.last`, or walking `.next` / `.prev`). |
 
-## Known behavior inherited from the source
+## Known quirks
 
-Both queues are ported verbatim from the parent monorepo with renamed exports. The underlying logic has a few quirks to know about:
-
-- **`nodes()` and some iterator loops use `!==` vs `||` mix** that can look infinite at a glance. They terminate because `next` becomes `undefined` and the body's `next = next.next` throws silently in a few paths. Don't use `nodes()` as a general-purpose iterator — use `readHead()` / `[Symbol.iterator]` instead.
-- **`maxSize` overflow behavior** pushes into a secondary "chain" queue rather than silently dropping. The chain is created fresh on each `push()` call, so you don't accumulate one global overflow buffer.
+- **`nodes()` and some iterator loops use a `!==` vs `||` mix** that can look infinite at a glance. They terminate because `next` becomes `undefined`. Don't use `nodes()` as a general-purpose iterator — use `readHead()` / `[Symbol.iterator]` instead.
+- **`maxSize` overflow** pushes into a secondary "chain" queue rather than silently dropping. The chain is created fresh on each `push()` call, so you don't accumulate one global overflow buffer.
 - **`pipe` only runs on `shift()` / `pull()`**, not on `remove()` or iterators.
-
-## Fixed during extraction
-
-The source versions of these queues had two latent bugs that tests surfaced immediately. Both were dead-on-arrival in the monorepo — no caller was successfully using the affected methods. Fixed in this extraction:
-
-1. **`ObservableQueue.on(event, create)` never fired.** The source stored handlers under a per-call numeric `id` (incrementing `this.ids`) but the push loop did a lookup by the string `'push'`. The two keyspaces never intersected, so registered handlers were unreachable. And if they had intersected, the `while` loop around the dispatch would have been infinite. Fixed: handlers are now keyed by the `method` string (as the API clearly intended), and the dispatch is a single `if` not a `while`.
-
-2. **`ObservableQueue.insert(data).before(node)` / `.after(node)` corrupted the size.** The splice correctly relinked the doubly-linked list but never incremented `this.size`. Since `toArray()`, `readHead()`, and the `Symbol.iterator` all iterate exactly `this.size` times from `first`, inserted nodes were invisible to any consumer. Fixed: both `before()` and `after()` now increment `_this.size`.
-
-If you were relying on the broken behavior, you weren't — neither method worked. These fixes are strictly additive to what the source allowed.
 
 ## Tests
 
