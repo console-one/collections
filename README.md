@@ -8,6 +8,8 @@ A home for collection data structures with different referencing and observation
 |---|---|---|
 | `LinkedQueue<T>` | `src/linked-queue.ts` | Plain doubly-linked FIFO queue. No events, no insert-at-node. Use when you just want a fast queue. |
 | `ObservableQueue<T>` | `src/observable-queue.ts` | Doubly-linked FIFO queue with `on(event, handler)` push listeners and `insert(data).before(node)` / `.after(node)` for positional insertion. Use when you need to react to pushes or splice items by node reference. |
+| `IndexMap<T>` | `src/index-map.ts` | Map keyed by a monotonic counter — keys are unique and never reused. `lock()` reserves a key before the value is ready; `set(key, value)` fills it later. Useful for subscription IDs, allocation slots, or any case where you need a stable handle before the value exists. |
+| `LinkedHeap<T>` | `src/linked-heap.ts` | Key-addressable binary heap whose items are exposed as `HeapNode` handles. Callers can `update(data)` in-place (preserving identity across rebalance), `remove(key)` by key, detach a node without reshaping, and async-iterate neighbors via `nextNode()` / `prevNode()`. Suitable for schedulers, priority queues whose priorities change, and reactive UIs. |
 
 Future variants planned: different backing structures (array ring, chunked), different reference techniques (weak refs, handle-based), different observation models (per-item subscriptions, batched flush events).
 
@@ -52,13 +54,54 @@ const lastNode = q.last!
 q.insert(3).before(lastNode)  // [1, 2, 3, 4]
 ```
 
+### IndexMap — stable handles before values exist
+
+```ts
+import { IndexMap } from '@console-one/collections'
+
+const subs = new IndexMap<(msg: string) => void>()
+const id = subs.store((msg) => console.log(msg))
+// ... later
+subs.delete(id)   // keys are never reused — safe to hand to external code
+
+// Reserve a slot, fill it later:
+const slot = subs.lock()
+// ... wiring happens, the handler is built
+subs.set(slot, (msg) => console.log('late', msg))
+```
+
+### LinkedHeap — priority queue with stable handles
+
+```ts
+import { LinkedHeap, HeapNode } from '@console-one/collections'
+
+const heap = new LinkedHeap<{ id: string; priority: number }>(
+  (a, b) => a.data.priority - b.data.priority,
+  (data) => data.id,   // mapper: derive the key from the value
+)
+
+const job = heap.push({ id: 'job-1', priority: 5 })
+heap.push({ id: 'job-2', priority: 1 })
+
+heap.peak()             // { id: 'job-2', priority: 1 }
+job.update({ id: 'job-1', priority: 0 })  // in-place reprioritize
+heap.peak()             // { id: 'job-1', priority: 0 }
+
+// Async neighbor iteration — yields existing then future pushes
+for await (const neighbor of heap.startNode!.nextNode()) {
+  console.log('neighbor', neighbor.data)
+}
+```
+
 ### Subpath imports
 
-You can import either class directly if you want to avoid loading both:
+You can import each class directly if you want to avoid loading the others:
 
 ```ts
 import { LinkedQueue } from '@console-one/collections/linked-queue'
 import { ObservableQueue } from '@console-one/collections/observable-queue'
+import { IndexMap } from '@console-one/collections/index-map'
+import { LinkedHeap, HeapNode } from '@console-one/collections/linked-heap'
 ```
 
 ## Shared API
@@ -120,4 +163,4 @@ new LinkedQueue<T>(maxSize?: number, { pipe?, chain? })
 npm test
 ```
 
-28 tests covering FIFO semantics, insertion, options, overflow, and event hooks.
+43 tests covering FIFO semantics, insertion, options, overflow, event hooks, index-map lock/set/delete, and linked-heap push/pop/update/remove/async iteration.
