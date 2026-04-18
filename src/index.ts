@@ -12,7 +12,7 @@ export {
   type ObservableQueueListeners,
 } from './observable-queue.js'
 
-export { IndexMap } from './index-map.js'
+export { IndexMap, IndexLock } from './index-map.js'
 
 export {
   LinkedHeap,

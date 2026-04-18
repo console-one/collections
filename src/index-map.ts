@@ -1,4 +1,42 @@
 /**
+ * A handle returned by {@link IndexMap.indexLock}. Pairs the reserved
+ * index with a reference back to the map so a holder can call
+ * {@link IndexLock.set} / {@link IndexLock.remove} without capturing
+ * both separately.
+ *
+ * Primary use case: listener registration where the callback needs to
+ * un-register itself from inside its own body. The callback closes over
+ * the IndexLock, not over the (map, id) pair.
+ *
+ * ```ts
+ * const subs = new IndexMap<Callback>()
+ * const lock = subs.indexLock()
+ * lock.set((data) => {
+ *   if (isDone(data)) lock.remove()   // self-cleanup from inside the callback
+ *   else handle(data)
+ * })
+ * ```
+ */
+export class IndexLock<T> {
+  constructor(
+    public index: number,
+    public map: IndexMap<T>,
+  ) {}
+
+  set(value: T): void {
+    this.map.set(this.index, value)
+  }
+
+  remove(): boolean {
+    return this.map.delete(this.index)
+  }
+
+  get(): T | undefined {
+    return this.map.get(this.index)
+  }
+}
+
+/**
  * A map keyed by a monotonically increasing counter, so keys are unique
  * and never reused.
  *
@@ -7,6 +45,10 @@
  * `lock()` reserves a key without a value — useful when you need a stable
  * identifier (to hand out externally, or to establish back-references)
  * before the value is available. Call `set(key, value)` later to fill it.
+ *
+ * `indexLock()` is the same reservation but returns an {@link IndexLock}
+ * handle that carries a back-reference to the map, so a self-removing
+ * subscriber can clean itself up from inside its own closure.
  */
 export class IndexMap<T> {
   map: { [key: string | number]: T }
@@ -38,12 +80,16 @@ export class IndexMap<T> {
   }
 
   delete(key: string | number): boolean {
-    const existed = this.map[key] !== undefined
-    if (existed) {
+    const existedInMap = this.map[key] !== undefined
+    const existedInAvailable = this.available.has(key)
+    if (existedInMap) {
       delete this.map[key]
       this.size -= 1
+    } else if (existedInAvailable) {
+      this.available.delete(key)
+      this.size -= 1
     }
-    return existed
+    return existedInMap || existedInAvailable
   }
 
   lock(): number {
@@ -52,6 +98,10 @@ export class IndexMap<T> {
     this.counter += 1
     this.size += 1
     return count
+  }
+
+  indexLock(): IndexLock<T> {
+    return new IndexLock(this.lock(), this)
   }
 
   set(count: string | number, value: T): void {
