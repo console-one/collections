@@ -1,6 +1,6 @@
 {
   "name": "@console-one/collections",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A home for collection data structures with different referencing and observation techniques. Ships LinkedQueue, ObservableQueue, IndexMap, LinkedHeap, SingleEntryObject, and HeapMap.",
   "repository": {
     "type": "git",
