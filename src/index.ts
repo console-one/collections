@@ -19,3 +19,16 @@ export {
   HeapNode,
   type Comparator,
 } from './linked-heap.js'
+
+export {
+  SingleEntryObject,
+  AutoIndexed,
+  KeyOrder,
+  WrappedKey,
+  DefaultOrderWrapper,
+  DefaultComparator,
+  type OrderPolicy,
+  type PartialOrderPolicy,
+} from './single-entry-object.js'
+
+export { HeapMap } from './heap-map.js'

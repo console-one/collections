@@ -1,7 +1,7 @@
 {
   "name": "@console-one/collections",
   "version": "0.2.0",
-  "description": "A home for collection data structures with different referencing and observation techniques. Ships LinkedQueue, ObservableQueue, IndexMap, and LinkedHeap.",
+  "description": "A home for collection data structures with different referencing and observation techniques. Ships LinkedQueue, ObservableQueue, IndexMap, LinkedHeap, SingleEntryObject, and HeapMap.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/console-one/collections.git"
@@ -33,6 +33,14 @@
     "./linked-heap": {
       "types": "./dist/linked-heap.d.ts",
       "import": "./dist/linked-heap.js"
+    },
+    "./single-entry-object": {
+      "types": "./dist/single-entry-object.d.ts",
+      "import": "./dist/single-entry-object.js"
+    },
+    "./heap-map": {
+      "types": "./dist/heap-map.d.ts",
+      "import": "./dist/heap-map.js"
     }
   },
   "files": [
@@ -41,7 +49,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -54,7 +62,9 @@
     "observable",
     "heap",
     "priority-queue",
-    "index-map"
+    "index-map",
+    "ordered-map",
+    "sorted-map"
   ],
   "author": "Andrew Chalmers",
   "license": "MIT",
